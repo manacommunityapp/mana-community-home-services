@@ -29,6 +29,20 @@ public class HomeServiceBookingController {
         return ResponseEntity.ok(bookingService.updateBookingStatus(id, status, reason));
     }
 
+    @PostMapping("/{id}/complete-otp")
+    public ResponseEntity<HomeServiceBookingEntity> completeBookingWithOtp(
+            @PathVariable String id,
+            @RequestParam String otp) {
+        return ResponseEntity.ok(bookingService.completeBookingWithOtp(id, otp));
+    }
+
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<HomeServiceBookingEntity> recordPayment(
+            @PathVariable String id,
+            @RequestParam(required = false) String transactionId) {
+        return ResponseEntity.ok(bookingService.recordPayment(id, transactionId));
+    }
+
     @GetMapping("/resident/{residentId}")
     public ResponseEntity<List<HomeServiceBookingEntity>> getByResident(@PathVariable String residentId) {
         return ResponseEntity.ok(bookingService.getBookingsByResident(residentId));

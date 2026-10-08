@@ -35,6 +35,10 @@ public class HomeServiceBookingService {
             );
         }
 
+        int slaHours = request.getSlaHours() != null && request.getSlaHours() > 0 ? request.getSlaHours() : 24;
+        LocalDateTime slaDueAt = LocalDateTime.now().plusHours(slaHours);
+        String completionOtp = String.format("%04d", (int) (Math.random() * 9000) + 1000);
+
         HomeServiceBookingEntity booking = HomeServiceBookingEntity.builder()
                 .id(UUID.randomUUID().toString())
                 .communityId(request.getCommunityId())
@@ -43,6 +47,7 @@ public class HomeServiceBookingService {
                 .tower(request.getTower())
                 .workerId(request.getWorkerId())
                 .categoryId(request.getCategoryId())
+                .packageId(request.getPackageId())
                 .bookingType(request.getBookingType())
                 .pricingModel(request.getPricingModel())
                 .startDate(request.getStartDate())
@@ -52,6 +57,10 @@ public class HomeServiceBookingService {
                 .endTime(request.getEndTime())
                 .price(request.getPrice())
                 .status(HomeServiceBookingStatus.REQUESTED)
+                .slaDueAt(slaDueAt)
+                .slaBreached(false)
+                .completionOtp(completionOtp)
+                .paymentStatus("PENDING")
                 .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -88,6 +97,36 @@ public class HomeServiceBookingService {
             assignmentRepository.save(assignment);
         }
 
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public HomeServiceBookingEntity completeBookingWithOtp(String bookingId, String enteredOtp) {
+        HomeServiceBookingEntity booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new HomeServiceNotFoundException("Booking not found: " + bookingId));
+
+        if (booking.getCompletionOtp() != null && !booking.getCompletionOtp().equals(enteredOtp.trim())) {
+            throw new com.manacommunity.homeservices.exception.HomeServiceException("Invalid completion OTP. Please provide the 4-digit code shown in resident app.");
+        }
+
+        booking.setStatus(HomeServiceBookingStatus.COMPLETED);
+        booking.setCompletedAt(LocalDateTime.now());
+        if (booking.getSlaDueAt() != null && LocalDateTime.now().isAfter(booking.getSlaDueAt())) {
+            booking.setSlaBreached(true);
+        }
+        booking.setUpdatedAt(LocalDateTime.now());
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public HomeServiceBookingEntity recordPayment(String bookingId, String transactionId) {
+        HomeServiceBookingEntity booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new HomeServiceNotFoundException("Booking not found: " + bookingId));
+
+        booking.setPaymentStatus("PAID");
+        booking.setPaymentTransactionId(transactionId != null ? transactionId : "PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        booking.setPaidAt(LocalDateTime.now());
+        booking.setUpdatedAt(LocalDateTime.now());
         return bookingRepository.save(booking);
     }
 

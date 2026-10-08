@@ -23,6 +23,8 @@ public class HomeServiceBookingRequest {
     private List<String> recurringDays;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String packageId;
+    private Integer slaHours;
     private BigDecimal price;
     private String notes;
 }

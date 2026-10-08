@@ -48,4 +48,13 @@ public class HomeServiceWorkerController {
     public ResponseEntity<HomeServiceWorkerEntity> registerWorker(@RequestBody HomeServiceWorkerEntity worker) {
         return ResponseEntity.ok(workerService.registerWorker(worker));
     }
+
+    @PatchMapping("/{id}/verification")
+    public ResponseEntity<HomeServiceWorkerEntity> updateVerification(
+            @PathVariable String id,
+            @RequestParam HomeServiceVerificationStatus status,
+            @RequestParam(required = false, defaultValue = "false") boolean policeVerified,
+            @RequestParam(required = false, defaultValue = "false") boolean communityVerified) {
+        return ResponseEntity.ok(workerService.updateVerification(id, status, policeVerified, communityVerified));
+    }
 }

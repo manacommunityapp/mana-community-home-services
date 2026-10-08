@@ -76,6 +76,32 @@ public class HomeServiceBookingEntity {
     @Builder.Default
     private HomeServiceBookingStatus status = HomeServiceBookingStatus.REQUESTED;
 
+    @Column(name = "package_id", length = 64)
+    private String packageId;
+
+    @Column(name = "sla_due_at")
+    private LocalDateTime slaDueAt;
+
+    @Column(name = "sla_breached")
+    @Builder.Default
+    private Boolean slaBreached = false;
+
+    @Column(name = "completion_otp", length = 6)
+    private String completionOtp;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "payment_status", length = 30)
+    @Builder.Default
+    private String paymentStatus = "PENDING"; // PENDING, PAID, REFUNDED
+
+    @Column(name = "payment_transaction_id", length = 100)
+    private String paymentTransactionId;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;
 
